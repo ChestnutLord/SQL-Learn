@@ -27,10 +27,10 @@ CREATE TABLE company_storage.company
 
 INSERT INTO company_storage.company(id, name, date)
 VALUES
-        --(1, 'Google', '2001-01-01'),
-       (2, 'Apple', '2002-10-29');
-      -- (3, 'Facedook', '1998-12-12'),
-       --(4, 'Amazon', '2005-06-17');
+    --(1, 'Google', '2001-01-01'),
+    (2, 'Apple', '2002-10-29');
+-- (3, 'Facedook', '1998-12-12'),
+--(4, 'Amazon', '2005-06-17');
 
 
 CREATE TABLE employee
@@ -275,17 +275,18 @@ SET company_id=NULL
 WHERE id = 5;
 
 SELECT company.name,
-       employee.first_name || employee.last_name fio
+       employee.first_name || employee.last_name fio --Оператор || в SQL используется для конкатенации строк (объединения двух или более строк в одну).
 FROM employee,
      company
 WHERE company_id = company.id;
 
--- КОГДА ВО FROM ПЕРЕЧИСЛЯЕМ ЧЕРЕЗ ЗАПЯТУЮ ПОЛУЧАЕТСЯ ДЕКАРТОВО ПРОИЗВЕДЕНИЕ
+-- КОГДА ВО FROM ПЕРЕЧИСЛЯЕМ ЧЕРЕЗ ЗАПЯТУЮ ПОЛУЧАЕТСЯ ДЕКАРТОВО ПРОИЗВЕДЕНИЕ,
 -- ТО ЕСТЬ КОЛ-ВО ЗАПИСЕЙ ИЗ ОДНОЙ УМНОЖАЕТСЯ НА КОЛ-ВО ЗАПИСЕЙ ИЗ ДРУГОЙ.
 
 -- | ВОТ ТАК УЖЕ НИКТО НЕ ДЕЛАЕТ ! ! !
 
 -- JOIN: ВСЕГО ИХ 5:
+
 -- INNER JOIN             (ПИШУТ ПРОСТО JOIN)
 -- LEFT OUTER JOIN   (ПИШУТ ПРОСТО LEFT JOIN)
 -- RIGHT OUTER JOIN (ПИШУТ ПРОСТО RIGHT JOIN)
@@ -293,6 +294,9 @@ WHERE company_id = company.id;
 -- CROSS JOIN - аналогия декартового произведения
 
 -- INNER ОТСЕКАЕТ ВСЕ, БЕЗ ВНЕШНЕГО КЛЮЧА
+
+-- INNER JOIN используется для объединения данных из нескольких таблиц,
+-- показывая только те строки, у которых есть совпадающие значения в связанных по FOREIGN KEY И PRIMARY KEY столбцах.
 
 SELECT c.name,
        employee.first_name || ' ' || employee.last_name fio,
@@ -305,6 +309,10 @@ FROM employee
               ON employee.id = ec.employee_id
          JOIN contact c2
               ON ec.contact_id = c2.id;
+
+-- CROSS JOIN — это тип объединения в SQL, который возвращает декартово произведение (Cartesian product) двух таблиц.
+-- Это означает, что каждая строка из первой таблицы объединяется с каждой строкой из второй таблицы.
+-- Такой подход используется редко, но может быть полезен, когда вам нужны все возможные комбинации данных из двух таблиц.
 
 SELECT *
 FROM employee
@@ -331,7 +339,7 @@ SELECT c.name, e.first_name
 FROM employee e
          RIGHT OUTER JOIN company c
                           ON c.id = e.company_id
-                              AND c.date > '2001-01-01';
+WHERE c.date > '2001-01-01';
 
 SELECT c.name, e.first_name
 FROM employee e
