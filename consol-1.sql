@@ -8,15 +8,16 @@ CREATE TABLE company_storage.company
 (
     id   INT PRIMARY KEY,
     name VARCHAR(128) UNIQUE NOT NULL,
-    date DATE NOT NULL CHECK (date > '1990-01-01' AND date < '2025-01-01'),
+    date DATE                NOT NULL CHECK (date > '1990-01-01' AND date < '2025-01-01'),
 
     UNIQUE (id, name)
 
 --SQL constraints:
+
+--PRIMARY KEY (UNIQUE and NOT NULL)- МОЖЕТ БЫТЬ ТОЛЬКО ОЛИН НА ВСЮ ТАБЛИЦУ
 --NOT NULL
 --UNIQUE (a,b)-важен порядок. конкатенация
 --CHECK
---PRIMARY KEY (UNIQUE and NOT NULL)- МОЖЕТ БЫТЬ ТОЛЬКО ОЛИН НА ВСЮ ТАБЛИЦУ
 --FOREIGN KEY
 
 );
@@ -24,24 +25,26 @@ CREATE TABLE company_storage.company
 
 -- ДЕФОЛТНОЕ ФОРМАТИРОВАНИЕ CTRL + ALT + L
 
-INSERT INTO company(id, name, date)
-VALUES (1, 'Google', '2001-01-01'),
-       (2, 'Apple', '2002-10-29'),
-       (3, 'Facedook', '1998-12-12'),
-       (4, 'Amazon', '2005-06-17');
+INSERT INTO company_storage.company(id, name, date)
+VALUES
+        --(1, 'Google', '2001-01-01'),
+       (2, 'Apple', '2002-10-29');
+      -- (3, 'Facedook', '1998-12-12'),
+       --(4, 'Amazon', '2005-06-17');
+
 
 CREATE TABLE employee
 (
     id         SERIAL PRIMARY KEY,
     first_name VARCHAR(123) NOT NULL,
     last_name  VARCHAR(128) NOT NULL,
-    company_id INT REFERENCES company (id) ON DELETE CASCADE, -- ВНЕШНИЙ КЛЮЧ
+    company_id INT REFERENCES company_storage.company (id) ON DELETE CASCADE, -- ВНЕШНИЙ КЛЮЧ
     salary     INT,
     UNIQUE (first_name, last_name)
 --    FOREIGN KEY (company_id) REFERENCES company
 );
 
-DROP TABLE company;
+DROP TABLE company_storage.company;
 
 insert into employee (first_name, last_name, salary, company_id)
 values ('Ivan', 'Sidorov', 40000, 1),
@@ -58,7 +61,7 @@ DROP TABLE employee;
 
 --установка АЛЬЯНСОВ- именование полей по-другому
 --DISTINCT - только уникальные (аналогия Set)
---UNION
+--UNION - объединяет результаты запросов, удаляя дублирующиеся строки
 
 insert into employee (first_name, last_name)
 values ('Natan', 'Cron');
@@ -94,10 +97,11 @@ WHERE salary IS NULL;
 -- ASC -ПО ВОЗРАСТАНИЮ
 
 --Ключевые слова:
---BETWEEN
---IN (Чёткое соответствие)
+--BETWEEN - МЕЖДУ КАКИМИ-ТО ЗНАЧЕНИЯМИ
+--IN - ЧЁТКОЕ соответствие (STRICTE)
 --LIKE
---ILIKE
+--ILIKE - Case-Insensitive LIKE. Оператор ILIKE игнорирует регистр символов.
+--        Запрос WHERE column ILIKE 'Test' найдет строки, где значение совпадает с Test, test, TEST
 
 -- УРОК 9, ФИЛЬТРАЦИЯ ДАННЫХ
 --=================================
@@ -107,13 +111,26 @@ WHERE salary IS NULL;
 -- В P.SQL ЕСТЬ ILIKE- FIRST IN UPPER CASE
 -- МЕЖДУ КАКИМИ-ТО ЗНАЧЕНИЯМИ == WHERE A BETWEEN B ABD C
 -- КОНКРЕТНОЕ СОВПАДЕНИЕ == WHERE A IN (B,C,D)
--- НЕ ЗАБЫВАЙ ПРО СКОБОЧКИ
+-- NB! НЕ ЗАБЫВАЙ ПРО СКОБОЧКИ
 
 -- УРОК 10 АГРЕГИРУЮЩИЕ И ВСТРОЕННЫЕ ФУНКЦИИ
 --=================================
 --АГРЕГИРКЮЩИЕ ФУНКЦИИ (sum, avg, max, min, count)
 
 -- УРОК 11 ВНЕШНИЙ КЛЮЧ
+--=================================
+
+--  company_id INT REFERENCES company_storage.company (id) ON DELETE CASCADE,
+
+-- принято именовать поле так: название-таблицы_полне-на-которое-ссылается
+--company (id) в скобочках поле на которое ссылаемся. можно не указывать, тогда будем ссылаться на первичный ключ таблицы.
+
+-- всё. это и есть объявление.
+
+-- есть другой способ. По аналогии с Unique --> FOREIGN KEY (company_id) REFERENCES company(id)
+
+-- NB! Более предпочтителен вариант с REFERENCES.
+-- NB! ИНДЕКСЫ, NOT NULL И UNIQUE НЕ СОЗДАЮТСЯ АВТОМАТИЧЕСКИ.
 
 -- УРОК 12 ОБЪЕДИНЕНИЕ ЗАПРОСОВ (UNION)
 --=================================
@@ -122,7 +139,7 @@ WHERE salary IS NULL;
 -- ИХ РАЗБИТЬ НА ДВА ЗАПРОСА, А РЕЗУЛЬТИРУЮЩИЙ НАБОР ОБЪЕДЕНИТЬ
 
 -- ПОСТАВИТЬ УСЛОВИЕ ЕСТЬ NULL ИСП IS, А НЕ =, И ТАКЖЕ NOT,
--- КОТОРОЕ ИСП СО ВСЕМИ КЛЮЧЕВЫМИ СЛОВАМИ (СТР. 82)
+-- КОТОРОЕ ИСП СО ВСЕМИ КЛЮЧЕВЫМИ СЛОВАМИ (СТР. 81)
 
 -- ИСП UNION ALL
 
@@ -153,10 +170,14 @@ FROM employee;
 
 SELECT *
 FROM employee
-WHERE company_id IN (SELECT company.id FROM company WHERE DATE > '01-01-2000');
+WHERE company_id IN (SELECT company.id
+                     FROM company
+                     WHERE DATE > '01-01-2000');
 
 -- УРОК 14 УДАЛЕНИЕ СТРОК
 --=================================
+
+-- DELETE (СТРОКУ)
 
 DELETE
 FROM employee
@@ -164,7 +185,8 @@ WHERE salary IS NULL;
 
 DELETE
 FROM employee
-WHERE salary = (SELECT max(salary) FROM employee);
+WHERE salary = (SELECT max(salary)
+                FROM employee);
 
 DELETE
 FROM company
@@ -183,11 +205,13 @@ FROM employee;
 -- УРОК 15 ОБНОВЛЕНИЕ СТРОК
 --=================================
 
+--UPDATE (СТРОКУ/запись В ТАБЛИЦЕ) table-name
+
 UPDATE employee
 SET company_id=1,
     salary=1700
-WHERE id = 10
-   or id = 9
+WHERE id = 7
+   OR id = 10
 RETURNING id, first_name || ' ' || employee.last_name fio;
 
 
@@ -197,7 +221,7 @@ CREATE DATABASE book_repository;
 
 SHOW hba_file;
 
-ALTER USER postgres PASSWORD 'postgres';
+-- ALTER USER postgres PASSWORD 'postgres';
 
 SHOW client_encoding;
 
@@ -234,12 +258,12 @@ CREATE TABLE company_storage.employee_contact
 DROP TABLE employee_contact;
 
 INSERT INTO employee_contact (employee_id, contact_id)
-VALUES (1, 1),
-       (1, 2),
-       (2, 2),
-       (2, 3),
-       (2, 4),
-       (3, 5);
+VALUES (6, 1),
+       (6, 2),
+       (7, 2),
+       (7, 3),
+       (8, 4),
+       (9, 5);
 
 --УРОК 20
 ------------------------------
