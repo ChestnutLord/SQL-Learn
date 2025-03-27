@@ -38,7 +38,7 @@ CREATE TABLE employee
     id         SERIAL PRIMARY KEY,
     first_name VARCHAR(123) NOT NULL,
     last_name  VARCHAR(128) NOT NULL,
-    company_id INT REFERENCES company_storage.company (id) ON DELETE CASCADE, -- ВНЕШНИЙ КЛЮЧ
+    company_id INT REFERENCES company (id) ON DELETE CASCADE, -- ВНЕШНИЙ КЛЮЧ
     salary     INT,
     UNIQUE (first_name, last_name)
 --    FOREIGN KEY (company_id) REFERENCES company
@@ -77,10 +77,16 @@ SELECT now(), 1 + 2 * 3;
 SELECT first_name
 FROM employee
 WHERE company_id IS NOT NULL
+
 UNION
+
 SELECT first_name
 FROM employee
 WHERE salary IS NULL;
+
+SELECT first_name
+FROM employee
+WHERE company_id IS NOT NULL OR salary IS NULL;
 
 --WHERE salary IN (1000, 3000)
 --   OR (first_name ILIKE 'iv%' AND last_name ILIKE '%ov%')
@@ -117,6 +123,14 @@ WHERE salary IS NULL;
 --=================================
 --АГРЕГИРКЮЩИЕ ФУНКЦИИ (sum, avg, max, min, count)
 
+SELECT MIN(Salary) AS TotalSalary
+FROM employee;
+
+SELECT first_name, last_name, salary
+FROM employee
+WHERE salary IS NOT NULL
+ORDER BY salary DESC
+LIMIT 1;
 -- УРОК 11 ВНЕШНИЙ КЛЮЧ
 --=================================
 
@@ -138,12 +152,12 @@ WHERE salary IS NULL;
 -- ИЛИ КОГДА ДВА ОЧЕНЬ СЛОЖНЫХ ЗАПРОСА К ОДНОЙ ТАБЛИЦЕ И МЫ ХОТИМ
 -- ИХ РАЗБИТЬ НА ДВА ЗАПРОСА, А РЕЗУЛЬТИРУЮЩИЙ НАБОР ОБЪЕДЕНИТЬ
 
--- ПОСТАВИТЬ УСЛОВИЕ ЕСТЬ NULL ИСП IS, А НЕ =, И ТАКЖЕ NOT,
+-- ПОСТАВИТЬ УСЛОВИЕ ЕСТЬ NULL ИСП IS, А НЕ =, И ТАКЖЕ IS NOT NULL,
 -- КОТОРОЕ ИСП СО ВСЕМИ КЛЮЧЕВЫМИ СЛОВАМИ (СТР. 81)
 
 -- ИСП UNION ALL
 
--- -- ПРИ ОБЪЕДИНЕНИИ ДВУХ ВЫБОРОК КОЛИЧЕСТВО КОЛОНОК И ИХ ТИПЫ ДАННЫХ ДОЛЖНЫ СОВПАДАТЬ !!!
+-- ПРИ ОБЪЕДИНЕНИИ ДВУХ ВЫБОРОК КОЛИЧЕСТВО КОЛОНОК И ИХ ТИПЫ ДАННЫХ ДОЛЖНЫ СОВПАДАТЬ !!!
 
 -- UNION ALL БЕРЁТ ВСЕХ,
 -- UNION - УБИРАЕТ ДУБЛИКАТЫ
@@ -177,7 +191,7 @@ WHERE company_id IN (SELECT company.id
 -- УРОК 14 УДАЛЕНИЕ СТРОК
 --=================================
 
--- DELETE (СТРОКУ)
+-- DELETE FROM (СТРОКУ)
 
 DELETE
 FROM employee
@@ -310,6 +324,14 @@ FROM employee
          JOIN contact c2
               ON ec.contact_id = c2.id;
 
+SELECT c.name,
+       e.first_name
+FROM company c
+         INNER JOIN employee e
+                    ON e.company_id = c.id;
+
+
+
 -- CROSS JOIN — это тип объединения в SQL, который возвращает декартово произведение (Cartesian product) двух таблиц.
 -- Это означает, что каждая строка из первой таблицы объединяется с каждой строкой из второй таблицы.
 -- Такой подход используется редко, но может быть полезен, когда вам нужны все возможные комбинации данных из двух таблиц.
@@ -347,7 +369,7 @@ FROM employee e
 
 --УРОК 22
 ------------------------------
---ГРУППИРОВКИ ЗАПРОСОВ. GROUPED BY & HAVING
+--ГРУППИРОВКИ ЗАПРОСОВ. GROUP BY & HAVING
 ------------------------------
 
 SELECT company.name,
@@ -369,7 +391,7 @@ values ('Sam', 'Arj', 3000, 1),
        ('Barth', 'Terran', 3400, 2),
        ('Su', 'Calin', 4870, 3);
 
-SELECT company.name,
+
 SELECT company.name,
        e.first_name,
        e.salary,
@@ -453,4 +475,8 @@ WHERE id <= 5;
 
 UPDATE company
 SET name='Facebook'
-WHERE name = 'Facedook'
+WHERE name = 'Facedook';
+
+UPDATE employee
+SET first_name='Anri'
+where first_name='Arni';
